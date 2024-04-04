@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5555/_users
+    username: postgres
+    password: 88888888
+    driver-class-name: org.postgresql.Driver
+    servlet:
+      multipart:
+        max-file-size: 15MB
+        max-request-size: 15MB
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database_platform: org.hibernate.dialect.PostgreSQLDialect
+  websocket:
+    max-text-message-buffer-size: 12500000
+application:
+  security:
+    jwt:
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      expiration: 86400000 # a day
+      refresh-token:
+        expiration: 604800000 # 7 days
+
