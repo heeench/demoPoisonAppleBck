@@ -71,6 +71,7 @@ public class SecurityConfiguration {
                                 .requestMatchers("/api/images/**").fullyAuthenticated()
                                 .requestMatchers("/chat/**").permitAll()
                                 .requestMatchers("/image/**").permitAll()
+                                .requestMatchers("/users/**").permitAll()
                                 .anyRequest().fullyAuthenticated()
                 )
 

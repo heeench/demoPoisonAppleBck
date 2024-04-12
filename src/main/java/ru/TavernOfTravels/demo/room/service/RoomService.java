@@ -7,6 +7,7 @@ import ru.TavernOfTravels.demo.room.repository.RoomRepository;
 import ru.TavernOfTravels.demo.user.model.User;
 import ru.TavernOfTravels.demo.user.repository.UserRepository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,6 +33,7 @@ public class RoomService {
         List<User> users = getUsersInRoom(room.getId());
 
         Room newRoom = Room.builder()
+                .id(UUID.randomUUID())
                 .name(room.getName())
                 .isOpen(true)
                 .createdByUser(user)
@@ -40,6 +42,7 @@ public class RoomService {
 
         return roomRepository.save(newRoom);
     }
+
 
     public void addUserToRoom(UUID roomId, String email) {
         Room room = roomRepository.findById(roomId)
@@ -54,6 +57,9 @@ public class RoomService {
     }
 
     public List<User> getUsersInRoom(UUID roomId) {
+        if (roomId == null) {
+            return Collections.emptyList(); // Возвращаем пустой список, если идентификатор комнаты равен null
+        }
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new RoomNotFoundException("Room not found with id: " + roomId));
         return room.getUsers();
