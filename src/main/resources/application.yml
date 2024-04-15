@@ -27,3 +27,5 @@ application:
       refresh-token:
         expiration: 604800000 # 7 days
 
+images:
+  directory: C:\Users\awrieu\Desktop\VScode\PoisonAppleImages

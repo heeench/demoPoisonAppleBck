@@ -68,7 +68,7 @@ public class SecurityConfiguration {
                                 .requestMatchers(DELETE, "/api/v1/management/**").hasAnyAuthority(ADMIN_DELETE.name(), MANAGER_DELETE.name())
                                 .requestMatchers("/api/v1/secured/**").fullyAuthenticated()
                                 .requestMatchers("/api/v1/rooms/**").fullyAuthenticated()
-                                .requestMatchers("/api/images/**").fullyAuthenticated()
+                                .requestMatchers("/api/images/**").permitAll()
                                 .requestMatchers("/chat/**").permitAll()
                                 .requestMatchers("/image/**").permitAll()
                                 .requestMatchers("/users/**").permitAll()

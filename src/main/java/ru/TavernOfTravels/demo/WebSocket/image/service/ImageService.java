@@ -1,61 +1,74 @@
 package ru.TavernOfTravels.demo.WebSocket.image.service;
 
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import ru.TavernOfTravels.demo.WebSocket.image.model.ImageData;
-import ru.TavernOfTravels.demo.WebSocket.image.repository.StorageRepository;
-import ru.TavernOfTravels.demo.WebSocket.image.utils.ImageUtils;
-
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class ImageService {
-    @Autowired
-    private StorageRepository repository;
 
-    private final String FOLDER_PATH = "C:\\Users\\awrieu\\Desktop\\VScode\\PoisonAppleImages\\";
-    @Transactional
-    public String postImage(MultipartFile file, UUID roomId) throws IOException {
-        String roomFolderPath = FOLDER_PATH + roomId.toString() + "\\";
-        String filePath = roomFolderPath + file.getOriginalFilename();
+    @Value("${images.directory}")
+    private String imagesDirectory;
 
-        Path path = Paths.get(roomFolderPath);
-        if (!Files.exists(path)) {
-            Files.createDirectories(path);
-        }
+    public String saveImage(MultipartFile file, String roomId) throws IOException {
+        // Создаем папку для данной комнаты, если она не существует
+        createRoomDirectory(roomId);
 
-        ImageData imageData = repository.save(ImageData.builder()
-                .name(file.getOriginalFilename())
-                .type(file.getContentType())
-                .imageData(ImageUtils.compressImage(file.getBytes()))
-                .filePath(filePath).build());
+        // Генерируем уникальное имя для изображения
+        String fileName = generateFileName(file.getOriginalFilename());
 
-        file.transferTo(new File(filePath));
-        System.out.println( imageData.getImageData().toString());
-        if (imageData != null) {
-            return file.getOriginalFilename();
-        }
+        // Путь к папке для данной комнаты
+        String roomPath = imagesDirectory + File.separator + roomId;
 
-        return null;
+        // Путь для сохранения изображения
+        Path path = Paths.get(roomPath, fileName);
+
+        // Сохраняем изображение
+        Files.write(path, file.getBytes());
+
+        // Возвращаем URL для загрузки изображения
+        return "http://localhost:8080/api/images/" + roomId + "/" + fileName;
     }
-    @Transactional
-    public byte[] getImage(String fileName) throws IOException {
-        Optional<ImageData> imageDataOptional = repository.findByName(fileName);
-        if (imageDataOptional.isPresent()) {
-            ImageData imageData = imageDataOptional.get();
-            byte[] decompressedImageData = ImageUtils.decompressImage(imageData.getImageData());
-            System.out.println( decompressedImageData.toString());
-            return decompressedImageData;
+
+    private void createRoomDirectory(String roomId) {
+        String roomPath = imagesDirectory + File.separator + roomId;
+        File directory = new File(roomPath);
+        if (!directory.exists()) {
+            directory.mkdirs();
         }
-        return null;
+    }
+
+    private String generateFileName(String originalFileName) {
+        return "image_" + System.currentTimeMillis() + "_" + originalFileName;
+    }
+
+    public Resource getImage(String roomId, String imageName) {
+        try {
+            // Получаем путь к изображению
+            Path imagePath = Paths.get(imagesDirectory, roomId, imageName);
+
+            // Преобразуем путь в ресурс
+            Resource imageResource = new UrlResource(imagePath.toUri());
+
+            // Проверяем, существует ли файл по данному пути
+            if (imageResource.exists() || imageResource.isReadable()) {
+                return imageResource;
+            } else {
+                // Если файл не найден, возвращаем null
+                return null;
+            }
+        } catch (MalformedURLException e) {
+            // Обработка исключения в случае неверного URL
+            e.printStackTrace();
+            return null;
+        }
     }
 }
