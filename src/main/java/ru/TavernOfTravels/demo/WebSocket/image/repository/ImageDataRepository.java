@@ -5,7 +5,7 @@ import ru.TavernOfTravels.demo.WebSocket.image.model.ImageData;
 
 import java.util.Optional;
 
-public interface StorageRepository extends JpaRepository<ImageData,Long> {
+public interface ImageDataRepository extends JpaRepository<ImageData,Long> {
 
-    Optional<ImageData> findByName(String fileName);
+    ImageData findByName(String fileName);
 }

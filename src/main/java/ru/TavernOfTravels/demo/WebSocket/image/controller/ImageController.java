@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.TavernOfTravels.demo.WebSocket.image.model.ImageData;
 import ru.TavernOfTravels.demo.WebSocket.image.service.ImageService;
 
 import java.io.IOException;
@@ -25,14 +26,11 @@ public class ImageController {
         this.messagingTemplate = messagingTemplate;
     }
 
-    // Метод для загрузки изображения на сервер и отправки его URL клиентам
     @PostMapping("/upload")
     public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file, @RequestParam("roomId") String roomId) {
         try {
-            // Сохраняем изображение и получаем его URL
             String imageUrl = imageService.saveImage(file, roomId);
 
-            // Отправляем URL всем клиентам через WebSocket
             messagingTemplate.convertAndSend("/topic/image/upload/" + roomId, imageUrl);
 
             return ResponseEntity.ok().body("Image uploaded successfully. URL: " + imageUrl);
@@ -44,19 +42,49 @@ public class ImageController {
 
     @GetMapping("/{roomId}/{imageName}")
     public ResponseEntity<Resource> getImage(@PathVariable("roomId") String roomId, @PathVariable("imageName") String imageName) {
-        // Получаем ресурс изображения по его имени и roomId
         Resource imageResource = imageService.getImage(roomId, imageName);
 
-        // Проверяем, существует ли такое изображение
         if (imageResource != null) {
-            // Если существует, возвращаем его с помощью ResponseEntity
             return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG) // Здесь вы можете указать правильный MIME тип для вашего изображения
+                    .contentType(MediaType.IMAGE_JPEG)
                     .body(imageResource);
         } else {
-            // Если изображение не найдено, возвращаем код состояния 404 Not Found
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/position")
+    public ResponseEntity<ImageData> createPosition(
+            @RequestParam("roomId") String roomId, @RequestParam("imageName") String imageName, @RequestParam ImageData imageData
+    ) {
+        Resource imageResource = imageService.getImage(roomId, imageName);
+        if (imageResource != null) {
+            var imagePos = new ImageData().builder()
+                    .x(imageData.getX())
+                    .y(imageData.getY())
+                    .rotation(imageData.getRotation())
+                    .scaleX(imageData.getScaleX())
+                    .scaleY(imageData.getScaleY())
+                    .locked(imageData.isLocked())
+                    .build();
+            imageService.saveImagePos(imagePos);
+            messagingTemplate.convertAndSend("/topic/image/position/" + roomId, imagePos);
+            return ResponseEntity.ok().body(imagePos);
+        }
+        return null;
+    }
+
+    @GetMapping("/{roomId}/{imageName}/imagePos")
+    public ResponseEntity<ImageData> createPosition(
+            @PathVariable("roomId") String roomId, @PathVariable("imageName") String imageName
+    ) {
+        Resource imageResource = imageService.getImage(roomId, imageName);
+        ImageData imageData = imageService.getImagePos(imageName);
+        if (imageResource != null && imageData != null) {
+            return ResponseEntity.ok()
+                    .body(imageData);
+        }else {
             return ResponseEntity.notFound().build();
         }
     }
 }
-

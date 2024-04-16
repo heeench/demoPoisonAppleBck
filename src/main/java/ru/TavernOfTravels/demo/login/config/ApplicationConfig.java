@@ -1,6 +1,8 @@
 package ru.TavernOfTravels.demo.login.config;
 
+import jakarta.servlet.MultipartConfigElement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -12,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.unit.DataSize;
 import ru.TavernOfTravels.demo.login.auditing.ApplicationAuditAware;
 import ru.TavernOfTravels.demo.user.repository.UserRepository;
 
@@ -50,5 +53,11 @@ public class ApplicationConfig {
         return new BCryptPasswordEncoder();
     }
 
-
+    @Bean
+    public MultipartConfigElement multipartConfigElement() {
+        MultipartConfigFactory factory = new MultipartConfigFactory();
+        factory.setMaxFileSize(DataSize.ofBytes(20012031));
+        factory.setMaxRequestSize(DataSize.ofBytes(20012031));
+        return factory.createMultipartConfig();
+    }
 }
