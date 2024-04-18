@@ -12,9 +12,13 @@ import ru.TavernOfTravels.demo.WebSocket.image.model.ImageData;
 import ru.TavernOfTravels.demo.WebSocket.image.service.ImageService;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/api/images")
+@CrossOrigin("http://localhost:3000")
 public class ImageController {
 
     private final ImageService imageService;
@@ -30,8 +34,6 @@ public class ImageController {
     public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file, @RequestParam("roomId") String roomId) {
         try {
             String imageUrl = imageService.saveImage(file, roomId);
-
-            messagingTemplate.convertAndSend("/topic/image/upload/" + roomId, imageUrl);
 
             return ResponseEntity.ok().body("Image uploaded successfully. URL: " + imageUrl);
         } catch (IOException e) {
@@ -53,29 +55,8 @@ public class ImageController {
         }
     }
 
-    @PostMapping("/position")
-    public ResponseEntity<ImageData> createPosition(
-            @RequestParam("roomId") String roomId, @RequestParam("imageName") String imageName, @RequestParam ImageData imageData
-    ) {
-        Resource imageResource = imageService.getImage(roomId, imageName);
-        if (imageResource != null) {
-            var imagePos = new ImageData().builder()
-                    .x(imageData.getX())
-                    .y(imageData.getY())
-                    .rotation(imageData.getRotation())
-                    .scaleX(imageData.getScaleX())
-                    .scaleY(imageData.getScaleY())
-                    .locked(imageData.isLocked())
-                    .build();
-            imageService.saveImagePos(imagePos);
-            messagingTemplate.convertAndSend("/topic/image/position/" + roomId, imagePos);
-            return ResponseEntity.ok().body(imagePos);
-        }
-        return null;
-    }
-
     @GetMapping("/{roomId}/{imageName}/imagePos")
-    public ResponseEntity<ImageData> createPosition(
+    public ResponseEntity<ImageData> getPosition(
             @PathVariable("roomId") String roomId, @PathVariable("imageName") String imageName
     ) {
         Resource imageResource = imageService.getImage(roomId, imageName);
@@ -87,4 +68,18 @@ public class ImageController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/fetchContent/{roomId}")
+    public ResponseEntity<List<ImageData>> fetchContent(@PathVariable("roomId") String roomId) {
+        List<ImageData> images= imageService.fetchContent(UUID.fromString(roomId));
+        System.out.println(images);
+        return ResponseEntity.ok().body(images);
+    }
+
+//    @DeleteMapping("/delete/{imageName}")
+//    public ResponseEntity<?> deleteImage(@PathVariable("imageName") String imageName) {
+//        System.out.println(imageName);
+//        imageService.deleteImage(imageName);
+//        return ResponseEntity.ok().body("Image deleted successfully");
+//    }
 }

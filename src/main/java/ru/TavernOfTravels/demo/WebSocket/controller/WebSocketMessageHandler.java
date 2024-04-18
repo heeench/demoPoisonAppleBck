@@ -1,4 +1,4 @@
-package ru.TavernOfTravels.demo.WebSocket.chat.controller;
+package ru.TavernOfTravels.demo.WebSocket.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,27 +12,31 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import ru.TavernOfTravels.demo.WebSocket.chat.entity.Message;
+import ru.TavernOfTravels.demo.WebSocket.image.model.ImageData;
+import ru.TavernOfTravels.demo.WebSocket.image.repository.ImageDataRepository;
+import ru.TavernOfTravels.demo.WebSocket.image.service.ImageService;
 import ru.TavernOfTravels.demo.room.repository.RoomRepository;
 import ru.TavernOfTravels.demo.user.model.UserDTO;
 import ru.TavernOfTravels.demo.user.repository.UserRepository;
 
-import javax.sound.midi.Soundbank;
-
 
 @Controller
 @CrossOrigin("http://localhost:3000")
-public class ChatMessageHandler extends TextWebSocketHandler {
+public class WebSocketMessageHandler extends TextWebSocketHandler {
     private final ConcurrentHashMap<WebSocketSession, UUID> sessionRoomMap = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, List<Message>> roomMessages = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, List<UserDTO>> roomUsers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, List<String>> usersInRoom = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<WebSocketSession>> activeUserConnections = new ConcurrentHashMap<>();
-
+    private final ConcurrentHashMap<UUID, List<ImageData>> imageInRoom = new ConcurrentHashMap<>();
     private final SimpMessagingTemplate messagingTemplate;
 
     @Autowired
@@ -41,8 +45,11 @@ public class ChatMessageHandler extends TextWebSocketHandler {
     private ObjectMapper objectMapper;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ImageService imageService;
 
-    public ChatMessageHandler(SimpMessagingTemplate messagingTemplate) {
+
+    public WebSocketMessageHandler(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -112,7 +119,6 @@ public class ChatMessageHandler extends TextWebSocketHandler {
         UUID roomId = UUID.fromString((String) session.getAttributes().get("roomId"));
         sessionRoomMap.put(session, roomId);
 
-        // Add user to active connections
         activeUserConnections
                 .computeIfAbsent(roomId.toString(), key -> ConcurrentHashMap.newKeySet())
                 .add(session);
@@ -126,13 +132,25 @@ public class ChatMessageHandler extends TextWebSocketHandler {
             if (sessions != null) {
                 sessions.remove(session);
 
-                // Remove user from usersInRoom if no active connections left
                 if (sessions.isEmpty()) {
                     roomUsers.get(roomId).removeIf(user -> user.getEmail().equals((String) session.getAttributes().get("userEmail")));
                     usersInRoom.get(roomId).remove(session.getAttributes().get("userEmail"));
                 }
             }
         }
+    }
+
+    @MessageMapping("/image")
+    public void handleUpdateImagePos(@Payload ImageData imageData) {
+        UUID roomId = imageData.getRoomId();
+
+        imageService.saveImagePos(imageData);
+        messagingTemplate.convertAndSend("/topic/image/upload/" + roomId, imageData);
+    }
+
+    private void saveImage(UUID roomId, ImageData imageData) {
+        imageService.saveImagePos(imageData);
+        imageInRoom.computeIfAbsent(roomId, key -> new ArrayList<>()).add(imageData);
     }
 
 }

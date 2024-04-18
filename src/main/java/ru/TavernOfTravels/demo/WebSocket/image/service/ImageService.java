@@ -15,7 +15,9 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
+import java.util.List;
+import java.util.UUID;
+
 
 @Service
 public class ImageService {
@@ -33,6 +35,17 @@ public class ImageService {
         String roomPath = imagesDirectory + File.separator + roomId;
         Path path = Paths.get(roomPath, fileName);
         Files.write(path, file.getBytes());
+        var image = new ImageData().builder()
+                .name(fileName)
+                .imagePath("http://localhost:8080/api/images/" + roomId + "/" + fileName)
+                .roomId(UUID.fromString(roomId))
+                .x(0)
+                .y(0)
+                .rotation(0)
+                .scaleY(0)
+                .scaleX(0)
+                .build();
+        saveImagePos(image);
 
         return "http://localhost:8080/api/images/" + roomId + "/" + fileName;
     }
@@ -66,10 +79,40 @@ public class ImageService {
     }
 
     public void saveImagePos(ImageData imagePos) {
-        imageDataRepository.save(imagePos);
+        System.out.println(imagePos + "\n" + imageDataRepository.findByName(imagePos.getName()));
+        if (imageDataRepository.findByName(imagePos.getName()) == null) {
+            imageDataRepository.save(imagePos);
+        } else { ImageData existingImageData = imageDataRepository.findByName(imagePos.getName());
+            if (existingImageData != null) {
+                existingImageData.setImagePath(imagePos.getImagePath());
+                existingImageData.setX(imagePos.getX());
+                existingImageData.setY(imagePos.getY());
+                existingImageData.setScaleX(imagePos.getScaleX());
+                existingImageData.setScaleY(imagePos.getScaleY());
+                existingImageData.setRotation(imagePos.getRotation());
+                existingImageData.setLocked(imagePos.isLocked());
+                imageDataRepository.save(existingImageData);
+            }
+        }
     }
 
     public ImageData getImagePos(String imageName) {
         return imageDataRepository.findByName(imageName);
+    }
+
+
+//    public boolean deleteImage(String imageName) {
+//        ImageData image = imageDataRepository.findByName(imageName);
+//        Long imageId = image.getId();
+//        System.out.println(imageName +  " " + imageId);
+//        imageDataRepository.deleteById(imageId);
+//        if (imageDataRepository.findByName(imageName) == null) {
+//            return true;
+//        } else { return false; }
+//    }
+
+    public List<ImageData> fetchContent(UUID roomId) {
+        List<ImageData> images = imageDataRepository.findByRoomId(roomId);
+        return images;
     }
 }

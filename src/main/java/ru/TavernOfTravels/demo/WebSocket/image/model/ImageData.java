@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "ImageData")
 @Data
@@ -17,13 +19,13 @@ public class ImageData {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    private UUID roomId;
     private String name;
-
-    private int x;
-    private int y;
-    private int rotation;
-    private int scaleX;
-    private int scaleY;
+    private String imagePath;
+    private double x;
+    private double y;
+    private double rotation;
+    private double scaleX;
+    private double scaleY;
     private boolean locked;
 }

@@ -18,8 +18,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/users").setAllowedOrigins("http://localhost:3000").withSockJS();
         registry.addEndpoint("/image")
                 .setAllowedOrigins("http://localhost:3000")
-                .withSockJS()
-                .setWebSocketEnabled(true);
+                .withSockJS();
     }
 
     @Override
