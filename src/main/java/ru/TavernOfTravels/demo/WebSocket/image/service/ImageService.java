@@ -39,11 +39,11 @@ public class ImageService {
                 .name(fileName)
                 .imagePath("http://localhost:8080/api/images/" + roomId + "/" + fileName)
                 .roomId(UUID.fromString(roomId))
-                .x(0)
-                .y(0)
+                .x(100)
+                .y(100)
                 .rotation(0)
-                .scaleY(0)
-                .scaleX(0)
+                .scaleY(0.8)
+                .scaleX(0.8)
                 .build();
         saveImagePos(image);
 

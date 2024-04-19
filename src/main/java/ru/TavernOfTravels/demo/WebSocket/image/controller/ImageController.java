@@ -35,7 +35,7 @@ public class ImageController {
         try {
             String imageUrl = imageService.saveImage(file, roomId);
 
-            return ResponseEntity.ok().body("Image uploaded successfully. URL: " + imageUrl);
+            return ResponseEntity.ok().body(imageUrl);
         } catch (IOException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload image.");
