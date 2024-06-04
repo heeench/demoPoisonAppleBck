@@ -55,6 +55,12 @@ public class ImageController {
         }
     }
 
+    @PostMapping("/update/tokenName")
+    public ResponseEntity<ImageData> updateTokenName(@RequestBody ImageData image) {
+        imageService.saveImagePos(image);
+        return ResponseEntity.ok().body(image);
+    }
+
     @GetMapping("/{roomId}/{imageName}/imagePos")
     public ResponseEntity<ImageData> getPosition(
             @PathVariable("roomId") String roomId, @PathVariable("imageName") String imageName

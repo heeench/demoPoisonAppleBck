@@ -39,11 +39,11 @@ public class ImageService {
                 .name(fileName)
                 .imagePath("http://localhost:8080/api/images/" + roomId + "/" + fileName)
                 .roomId(UUID.fromString(roomId))
-                .x(100)
+                .x(200)
                 .y(100)
                 .rotation(0)
-                .scaleY(0.8)
-                .scaleX(0.8)
+                .scaleY(0.5)
+                .scaleX(0.5)
                 .build();
         saveImagePos(image);
 
@@ -79,12 +79,13 @@ public class ImageService {
     }
 
     public void saveImagePos(ImageData imagePos) {
-        System.out.println(imagePos + "\n" + imageDataRepository.findByName(imagePos.getName()));
         if (imageDataRepository.findByName(imagePos.getName()) == null) {
             imageDataRepository.save(imagePos);
         } else { ImageData existingImageData = imageDataRepository.findByName(imagePos.getName());
             if (existingImageData != null) {
                 existingImageData.setImagePath(imagePos.getImagePath());
+                existingImageData.setName(imagePos.getName());
+                existingImageData.setTokenName(imagePos.getTokenName());
                 existingImageData.setX(imagePos.getX());
                 existingImageData.setY(imagePos.getY());
                 existingImageData.setScaleX(imagePos.getScaleX());

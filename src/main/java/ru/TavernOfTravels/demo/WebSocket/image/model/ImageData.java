@@ -21,6 +21,7 @@ public class ImageData {
     private Long id;
     private UUID roomId;
     private String name;
+    private String tokenName;
     private String imagePath;
     private double x;
     private double y;

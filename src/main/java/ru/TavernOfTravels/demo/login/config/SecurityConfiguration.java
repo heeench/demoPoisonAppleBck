@@ -69,9 +69,11 @@ public class SecurityConfiguration {
                                 .requestMatchers("/api/v1/secured/**").fullyAuthenticated()
                                 .requestMatchers("/api/v1/rooms/**").fullyAuthenticated()
                                 .requestMatchers("/api/images/**").permitAll()
+                                .requestMatchers("/api/map/**").permitAll()
                                 .requestMatchers("/chat/**").permitAll()
                                 .requestMatchers("/image/**").permitAll()
                                 .requestMatchers("/users/**").permitAll()
+                                .requestMatchers("https://dddice.com/**").permitAll()
                                 .anyRequest().fullyAuthenticated()
                 )
 

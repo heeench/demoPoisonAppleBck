@@ -52,4 +52,46 @@ public class RoomController {
         UUID getRoom = roomService.enterTheRoom(roomId);
         return ResponseEntity.ok().body(getRoom);
     }
+
+    @CrossOrigin("http://localhost:3000")
+    @GetMapping("/gameMaster/{roomId}")
+    public ResponseEntity<String> getGameMaster(@PathVariable UUID roomId) {
+        String GM = roomService.getCreator(roomId);
+        return ResponseEntity.ok().body(GM);
+    }
+
+    @CrossOrigin("http://localhost:3000")
+    @PostMapping("/diceSlug/{roomId}")
+    public ResponseEntity<Room> postDiceSlug(@PathVariable UUID roomId, @RequestBody String slug) {
+        Room savedDiceSlug = roomService.saveDiceSlug(roomId, slug);
+        return ResponseEntity.ok(savedDiceSlug);
+    }
+
+    @CrossOrigin("http://localhost:3000")
+    @GetMapping("/diceSlug/{roomId}")
+    public ResponseEntity<String> getDiceSlug(@PathVariable UUID roomId) {
+        String slug = roomService.getDiceSlug(roomId);
+        return ResponseEntity.ok().body(slug);
+    }
+
+//    @CrossOrigin("http://localhost:3000")
+//    @PostMapping("/diceSecret/diceCode/{roomId}")
+//    public ResponseEntity<Room> postDiceSecretCode(@PathVariable UUID roomId, @RequestBody String secret, @RequestBody String code) {
+//        Room savedDiceRoom = roomService.saveDiceSecretCode(roomId, secret, code);
+//        return ResponseEntity.ok(savedDiceRoom);
+//    }
+
+//    @CrossOrigin("http://localhost:3000")
+//    @GetMapping("/diceSecret{roomId}")
+//    public ResponseEntity<String> getDiceSecret(@PathVariable UUID roomId) {
+//        String secret = roomService.getDiceSecret(roomId);
+//        return ResponseEntity.ok().body(secret);
+//    }
+//
+//    @CrossOrigin("http://localhost:3000")
+//    @GetMapping("/diceCode/{roomId}")
+//    public ResponseEntity<String> getDiceCode(@PathVariable UUID roomId) {
+//        String code = roomService.getDiceCode(roomId);
+//        return ResponseEntity.ok().body(code);
+//    }
 }

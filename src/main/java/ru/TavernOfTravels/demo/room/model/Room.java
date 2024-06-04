@@ -41,6 +41,9 @@ public class Room {
     )
     @JsonIgnore
     private List<User> users;
+    private String diceSlug;
+//    private String diceSecret;
+//    private String diceCode;
     public void setCreatedBy(User createdByUser) {
         this.createdByUser = createdByUser;
     }

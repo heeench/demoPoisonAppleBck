@@ -74,5 +74,56 @@ public class RoomService {
     public boolean existsById(UUID roomId) {
         return roomRepository.existsById(roomId);
     }
+
+    public String getCreator(UUID roomId) {
+        if (roomRepository.existsById(roomId)) {
+            Integer gmId = roomRepository.findCreatedByUserIdByRoomId(roomId);
+            String gameMaster = userRepository.findNicknameById(gmId);
+            return gameMaster;
+        } else {
+            return null;
+        }
+    }
+
+    public Room saveDiceSlug(UUID roomId, String slug) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new RoomNotFoundException("Room not found with id " + roomId));
+        room.setDiceSlug(slug);
+        return roomRepository.save(room);
+    }
+
+    public String getDiceSlug(UUID roomId) {
+        if (roomRepository.existsById(roomId)) {
+            Room room = roomRepository.findById(roomId)
+                    .orElseThrow(() -> new RoomNotFoundException("Room not found with id: " + roomId));
+            String slug = room.getDiceSlug();
+            return slug;
+        } else return null;
+    }
+
+//    public Room saveDiceSecretCode(UUID roomId, String secret, String code) {
+//        Room room = roomRepository.findById(roomId)
+//                .orElseThrow(() -> new RoomNotFoundException("Room not found with id " + roomId));
+//        room.setDiceSecret(secret);
+//        room.setDiceCode(code);
+//        return roomRepository.save(room);
+//    }
+
+//    public String getDiceSecret(UUID roomId) {
+//        if (roomRepository.existsById(roomId)) {
+//            Room room = roomRepository.findById(roomId)
+//                    .orElseThrow(() -> new RoomNotFoundException("Room not found with id: " + roomId));
+//            String secret = room.getDiceSecret();
+//            return secret;
+//        } else return null;
+//    }
+//    public String getDiceCode(UUID roomId) {
+//        if (roomRepository.existsById(roomId)) {
+//            Room room = roomRepository.findById(roomId)
+//                    .orElseThrow(() -> new RoomNotFoundException("Room not found with id: " + roomId));
+//            String code = room.getDiceCode();
+//            return code;
+//        } else return null;
+//    }
 }
 
