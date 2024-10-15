@@ -102,15 +102,40 @@ public class ImageService {
     }
 
 
-//    public boolean deleteImage(String imageName) {
-//        ImageData image = imageDataRepository.findByName(imageName);
-//        Long imageId = image.getId();
-//        System.out.println(imageName +  " " + imageId);
-//        imageDataRepository.deleteById(imageId);
-//        if (imageDataRepository.findByName(imageName) == null) {
-//            return true;
-//        } else { return false; }
-//    }
+    public boolean deleteImage(String imageName, String roomId) {
+        ImageData image = imageDataRepository.findByName(imageName);
+        if (image == null) {
+            System.err.println("Изображение не найдено в базе данных.");
+            return false;
+        }
+        Long imageId = image.getId();
+        System.out.println("Удаляем изображение: " + imageName + " с ID: " + imageId);
+
+        imageDataRepository.deleteById(imageId);
+
+        Path imagePath = Paths.get(imagesDirectory + File.separator + roomId, imageName);
+
+        try {
+            if (Files.deleteIfExists(imagePath)) {
+                System.out.println("Файл успешно удален с файловой системы: " + imagePath.toString());
+            } else {
+                System.err.println("Файл не найден на файловой системе: " + imagePath.toString());
+                return false;
+            }
+        } catch (IOException e) {
+            System.err.println("Ошибка при удалении файла: " + e.getMessage());
+            return false;
+        }
+
+        if (imageDataRepository.findByName(imageName) == null) {
+            System.out.println("Изображение успешно удалено из базы данных.");
+            return true;
+        } else {
+            System.err.println("Не удалось удалить изображение из базы данных.");
+            return false;
+        }
+    }
+
 
     public List<ImageData> fetchContent(UUID roomId) {
         List<ImageData> images = imageDataRepository.findByRoomId(roomId);

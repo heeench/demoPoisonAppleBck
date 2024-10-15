@@ -82,10 +82,17 @@ public class ImageController {
         return ResponseEntity.ok().body(images);
     }
 
-//    @DeleteMapping("/delete/{imageName}")
-//    public ResponseEntity<?> deleteImage(@PathVariable("imageName") String imageName) {
-//        System.out.println(imageName);
-//        imageService.deleteImage(imageName);
-//        return ResponseEntity.ok().body("Image deleted successfully");
-//    }
+    @DeleteMapping("/deleteImage/{roomId}/{imageName}")
+    public ResponseEntity<String> deleteImage(@PathVariable("imageName") String imageName, @PathVariable("roomId") String roomId) {
+        System.out.println("Удаление изображения: " + imageName);
+
+        boolean isDeleted = imageService.deleteImage(imageName, roomId);
+
+        if (isDeleted) {
+            return ResponseEntity.ok().body("Image deleted successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Image not found or could not be deleted");
+        }
+    }
+
 }
